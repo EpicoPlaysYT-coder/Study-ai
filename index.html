@@ -1,482 +1,573 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en" class="h-full">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Study Ai – Suhel & Saurabh Sir</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet"/>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
-          colors: {
-            brand: { 50:'#f0f4ff', 100:'#e0eaff', 200:'#c7d7fd', 300:'#a5bafc', 400:'#818cf8', 500:'#6366f1', 600:'#4f46e5', 700:'#4338ca' },
-            surf: { 0:'#ffffff', 1:'#f8f9fc', 2:'#f1f3f9', 3:'#e8ecf5', 4:'#d1d8eb' }
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YourFriend - Universal AI</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Marked.js (Markdown) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Prism.js (Code Highlighting) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #131314;
+            color: #e3e3e3;
         }
-      }
-    }
-  </script>
-  <style>
-    *{box-sizing:border-box;}
-    body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8f9fc;}
 
-    /* Sidebar */
-    #sidebar{width:260px;min-width:260px;background:#fff;border-right:1px solid #e8ecf5;display:flex;flex-direction:column;height:100vh;transition:transform .3s;}
-    @media(max-width:768px){
-      #sidebar{position:fixed;top:0;left:0;z-index:50;transform:translateX(-100%);}
-      #sidebar.open{transform:translateX(0);}
-      #overlay{display:block!important;}
-    }
+        .chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-container::-webkit-scrollbar-thumb {
+            background-color: #303030;
+            border-radius: 10px;
+        }
 
-    /* Chat history item */
-    .hist-item{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;cursor:pointer;font-size:13px;color:#374151;transition:background .15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .hist-item:hover{background:#f1f3f9;}
-    .hist-item.active{background:#e0eaff;color:#4f46e5;font-weight:600;}
+        .sidebar-item:hover {
+            background-color: #282a2c;
+        }
+        .sidebar-item.active {
+            background-color: #333537;
+        }
 
-    /* Welcome gradient icon */
-    .ai-icon{width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,#818cf8,#6366f1);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px #6366f130;}
+        .markdown-content pre {
+            background: #1e1e1e !important;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        .markdown-content code {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+        }
+        .markdown-content p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+        .markdown-content ul, .markdown-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
 
-    /* Suggestion card */
-    .sug-card{background:#fff;border:1.5px solid #e8ecf5;border-radius:14px;padding:14px 16px;cursor:pointer;text-align:left;font-size:13px;color:#374151;transition:border-color .2s,box-shadow .2s;line-height:1.5;}
-    .sug-card:hover{border-color:#818cf8;box-shadow:0 4px 16px #6366f115;}
+        .thinking-dot {
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
 
-    /* Message bubbles */
-    .user-bubble{background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;border-radius:18px 18px 4px 18px;padding:12px 18px;max-width:80%;font-size:14.5px;line-height:1.6;box-shadow:0 4px 12px #6366f125;}
-    .ai-bubble{background:#fff;border:1.5px solid #e8ecf5;border-radius:18px 18px 18px 4px;padding:14px 18px;max-width:85%;font-size:14.5px;line-height:1.6;box-shadow:0 2px 8px #0000060a;}
+        /* Arena Mode Side-by-Side */
+        .arena-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
 
-    /* Markdown inside ai-bubble */
-    .ai-bubble p{margin-bottom:.75rem;}
-    .ai-bubble h1,.ai-bubble h2,.ai-bubble h3{font-weight:700;margin:.8rem 0 .4rem;color:#1e293b;}
-    .ai-bubble h1{font-size:1.2rem;} .ai-bubble h2{font-size:1.05rem;} .ai-bubble h3{font-size:.95rem;}
-    .ai-bubble ul,.ai-bubble ol{padding-left:1.25rem;margin-bottom:.75rem;}
-    .ai-bubble ul{list-style:disc;} .ai-bubble ol{list-style:decimal;}
-    .ai-bubble code{background:#f1f3f9;padding:2px 6px;border-radius:5px;font-size:.85em;font-family:monospace;}
-    .ai-bubble pre{background:#1e293b;color:#a5f3fc;padding:12px;border-radius:10px;overflow-x:auto;margin-bottom:.75rem;}
-    .ai-bubble pre code{background:transparent;color:inherit;padding:0;}
-    .ai-bubble a{color:#6366f1;text-decoration:underline;}
-    .ai-bubble strong{font-weight:700;color:#1e293b;}
+        @media (max-width: 768px) {
+            .arena-grid {
+                grid-template-columns: 1fr;
+            }
+        }
 
-    /* Input box */
-    #inputBox{background:#fff;border:1.5px solid #e8ecf5;border-radius:16px;display:flex;align-items:flex-end;gap:8px;padding:8px 10px;box-shadow:0 4px 20px #0000060f;transition:border-color .2s;}
-    #inputBox:focus-within{border-color:#818cf8;box-shadow:0 4px 20px #6366f120;}
-    #promptInput{flex:1;border:none;outline:none;resize:none;background:transparent;font-family:inherit;font-size:14.5px;color:#1e293b;max-height:160px;overflow-y:auto;padding:6px 4px;}
-    #promptInput::placeholder{color:#9ca3af;}
+        .glass-panel {
+            background: rgba(30, 31, 32, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-    /* Loader */
-    .dots{display:inline-flex;gap:5px;align-items:center;}
-    .dots span{width:7px;height:7px;background:#818cf8;border-radius:50%;animation:dotBounce 1.3s infinite ease-in-out both;}
-    .dots span:nth-child(1){animation-delay:-.3s;} .dots span:nth-child(2){animation-delay:-.15s;}
-    @keyframes dotBounce{0%,80%,100%{transform:scale(0);}40%{transform:scale(1);}}
+        .gemini-gradient {
+            background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-    /* Modal */
-    #settingsModal{display:none;position:fixed;inset:0;z-index:100;background:#00000040;align-items:center;justify-content:center;}
-    #settingsModal.show{display:flex;}
-    #settingsBox{background:#fff;border-radius:20px;padding:28px;width:90%;max-width:420px;box-shadow:0 20px 60px #0000001a;}
-
-    /* Scrollbar */
-    ::-webkit-scrollbar{width:5px;} ::-webkit-scrollbar-thumb{background:#d1d8eb;border-radius:4px;}
-
-    /* Send button */
-    #sendBtn{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;flex-shrink:0;transition:opacity .2s;box-shadow:0 4px 12px #6366f135;}
-    #sendBtn:disabled{opacity:.4;cursor:not-allowed;}
-
-    textarea{resize:none;overflow-y:hidden;}
-  </style>
+        .model-pill {
+            background: #282a2c;
+            border: 1px solid #3c4043;
+            transition: all 0.2s;
+        }
+        .model-pill.selected {
+            border-color: #8ab4f8;
+            background: rgba(138, 180, 248, 0.1);
+        }
+    </style>
 </head>
 <body class="flex h-screen overflow-hidden">
 
-<!-- Sidebar Overlay (mobile) -->
-<div id="overlay" class="fixed inset-0 bg-black/40 z-40 hidden" onclick="toggleSidebar(false)"></div>
-
-<!-- SIDEBAR -->
-<aside id="sidebar">
-  <div class="p-4 border-b border-surf-3 flex items-center gap-2">
-    <button onclick="newChat()" class="flex items-center gap-2 w-full bg-brand-50 hover:bg-brand-100 text-brand-600 font-semibold text-sm py-2.5 px-4 rounded-xl transition-colors">
-      <span class="material-symbols-rounded text-[18px]">add</span> New Chat
+    <!-- Mobile Sidebar Toggle -->
+    <button id="mobile-sidebar-toggle" class="fixed top-4 left-4 z-50 p-2 lg:hidden bg-zinc-800 rounded-lg text-white">
+        <i data-lucide="menu"></i>
     </button>
-  </div>
-  <div class="flex-1 overflow-y-auto p-3 space-y-1">
-    <p class="text-[10px] font-semibold uppercase tracking-widest text-gray-400 px-2 mb-2">Recent Chats</p>
-    <div id="histList"></div>
-  </div>
-  <div class="p-4 border-t border-surf-3 space-y-2">
-    <button onclick="openSettings()" class="hist-item w-full">
-      <span class="material-symbols-rounded text-[17px] text-gray-400">settings</span> Settings
-    </button>
-    <div class="flex items-center gap-3 px-2 py-2">
-      <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-brand-400 to-brand-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">S</div>
-      <div>
-        <p class="text-sm font-semibold text-gray-700 leading-none">Study Ai</p>
-        <p class="text-[11px] text-gray-400 mt-0.5">Class 1–12 Assistant</p>
-      </div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 bg-[#1e1f20] transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col">
+        <div class="p-4 flex items-center justify-between">
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                <span class="gemini-gradient">YourFriend</span>
+            </h1>
+            <button onclick="createNewChat()" class="p-2 hover:bg-zinc-800 rounded-full transition-colors" title="New Chat">
+                <i data-lucide="plus-circle" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <div id="chat-history" class="flex-1 overflow-y-auto px-2 space-y-1 chat-container">
+            <!-- Chat history items will be injected here -->
+        </div>
+
+        <div class="p-4 border-t border-zinc-800 space-y-2">
+            <button onclick="toggleArenaMode()" id="arena-toggle-btn" class="w-full flex items-center gap-3 p-3 text-sm font-medium rounded-lg sidebar-item transition-all">
+                <i data-lucide="swords" class="w-5 h-5 text-purple-400"></i>
+                Arena Mode
+            </button>
+            <button onclick="openSettings()" class="w-full flex items-center gap-3 p-3 text-sm font-medium rounded-lg sidebar-item transition-all">
+                <i data-lucide="settings" class="w-5 h-5"></i>
+                Settings
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full lg:ml-72 bg-[#131314] relative">
+        
+        <!-- Header / Model Selector -->
+        <header class="h-16 flex items-center justify-between px-6 border-b border-zinc-800 bg-[#131314]/80 backdrop-blur-md sticky top-0 z-30">
+            <div id="model-selector-container" class="flex gap-2">
+                <select id="primary-model" class="bg-zinc-800 text-sm border-none rounded-lg px-3 py-1 focus:ring-1 focus:ring-blue-500 outline-none">
+                    <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash</option>
+                    <option value="openai/gpt-4o">GPT-4o</option>
+                    <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+                    <option value="meta-llama/llama-3.1-405b">Llama 3.1 405B</option>
+                    <option value="custom">Custom Model...</option>
+                </select>
+                <div id="arena-secondary-container" class="hidden flex items-center gap-2">
+                    <span class="text-zinc-500 font-bold">VS</span>
+                    <select id="secondary-model" class="bg-zinc-800 text-sm border-none rounded-lg px-3 py-1 focus:ring-1 focus:ring-purple-500 outline-none">
+                        <option value="openai/gpt-4o">GPT-4o</option>
+                        <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash</option>
+                        <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+                        <option value="deepseek/deepseek-chat">DeepSeek V3</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div id="connection-status" class="flex items-center gap-2 text-xs text-green-500">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    Ready
+                </div>
+            </div>
+        </header>
+
+        <!-- Chat Area -->
+        <div id="chat-window" class="flex-1 overflow-y-auto chat-container p-4 md:p-8 space-y-8">
+            <!-- Welcome View -->
+            <div id="welcome-view" class="h-full flex flex-col items-center justify-center text-center max-w-2xl mx-auto space-y-6">
+                <h2 class="text-4xl font-semibold tracking-tight">Hello, I'm <span class="gemini-gradient">YourFriend</span></h2>
+                <p class="text-zinc-400 text-lg">Your universal AI assistant. How can I help you today?</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                    <button onclick="setPrompt('Explain quantum computing like I\'m five')" class="p-4 bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700 rounded-xl text-left transition-all">
+                        <p class="text-sm font-medium">Explain quantum computing...</p>
+                    </button>
+                    <button onclick="setPrompt('Write a Python script for a simple web scraper')" class="p-4 bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700 rounded-xl text-left transition-all">
+                        <p class="text-sm font-medium">Write a Python script...</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages go here -->
+            <div id="messages-list" class="max-w-4xl mx-auto w-full space-y-8 pb-32"></div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="absolute bottom-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-t from-[#131314] via-[#131314] to-transparent">
+            <div class="max-w-4xl mx-auto relative group">
+                <textarea 
+                    id="chat-input"
+                    rows="1"
+                    placeholder="Ask YourFriend anything..."
+                    class="w-full bg-[#1e1f20] text-white rounded-2xl py-4 pl-6 pr-14 resize-none border-none focus:ring-2 focus:ring-blue-500 transition-all outline-none shadow-xl"
+                ></textarea>
+                <button 
+                    id="send-btn"
+                    class="absolute right-3 bottom-3 p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <i data-lucide="send" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <p class="text-center text-[10px] text-zinc-500 mt-3">
+                YourFriend can make mistakes. Consider checking important information.
+            </p>
+        </div>
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div class="p-6 border-b border-zinc-800 flex justify-between items-center">
+                <h3 class="text-xl font-bold">Settings</h3>
+                <button onclick="closeSettings()" class="text-zinc-400 hover:text-white">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-zinc-300">OpenRouter API Key</label>
+                    <div class="relative">
+                        <input type="password" id="api-key-input" placeholder="sk-or-v1-..." class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <p class="text-xs text-zinc-500">Get your key from <a href="https://openrouter.ai/keys" target="_blank" class="text-blue-400 hover:underline">openrouter.ai</a></p>
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-zinc-300">Custom Model Name</label>
+                    <input type="text" id="custom-model-input" placeholder="e.g. meta-llama/llama-3.1-70b-instruct" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+
+                <div class="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg">
+                    <span class="text-sm">Dark Mode</span>
+                    <div class="w-10 h-5 bg-blue-600 rounded-full flex items-center px-1">
+                        <div class="w-3 h-3 bg-white rounded-full ml-auto"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 bg-zinc-800/30 flex justify-end gap-3">
+                <button onclick="closeSettings()" class="px-4 py-2 text-sm font-medium hover:bg-zinc-800 rounded-lg transition-colors">Cancel</button>
+                <button onclick="saveSettings()" class="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors">Save Changes</button>
+            </div>
+        </div>
     </div>
-  </div>
-</aside>
 
-<!-- MAIN -->
-<main class="flex-1 flex flex-col min-w-0 h-screen">
+    <!-- JavaScript Logic -->
+    <script>
+        // --- State Management ---
+        let chats = JSON.parse(localStorage.getItem('yourfriend_chats') || '[]');
+        let activeChatId = null;
+        let config = JSON.parse(localStorage.getItem('yourfriend_config') || '{"apiKey": "", "customModel": "", "arenaMode": false}');
+        
+        const elements = {
+            chatWindow: document.getElementById('chat-window'),
+            messagesList: document.getElementById('messages-list'),
+            chatInput: document.getElementById('chat-input'),
+            sendBtn: document.getElementById('send-btn'),
+            historyList: document.getElementById('chat-history'),
+            settingsModal: document.getElementById('settings-modal'),
+            apiKeyInput: document.getElementById('api-key-input'),
+            customModelInput: document.getElementById('custom-model-input'),
+            primaryModel: document.getElementById('primary-model'),
+            secondaryModel: document.getElementById('secondary-model'),
+            arenaContainer: document.getElementById('arena-secondary-container'),
+            arenaToggleBtn: document.getElementById('arena-toggle-btn'),
+            welcomeView: document.getElementById('welcome-view'),
+            mobileToggle: document.getElementById('mobile-sidebar-toggle'),
+            sidebar: document.getElementById('sidebar')
+        };
 
-  <!-- Header -->
-  <header class="h-14 flex items-center px-4 gap-3 bg-white border-b border-surf-3 sticky top-0 z-10">
-    <button class="md:hidden p-1.5 rounded-lg hover:bg-surf-2 transition-colors" onclick="toggleSidebar(true)">
-      <span class="material-symbols-rounded text-gray-500">menu</span>
-    </button>
-    <div class="flex items-center gap-2">
-      <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
-        <span class="material-symbols-rounded text-white text-[15px]">school</span>
-      </div>
-      <span class="font-bold text-gray-800 text-[15px]">Study Ai</span>
-      <span class="text-[10px] bg-brand-100 text-brand-600 font-semibold px-2 py-0.5 rounded-full ml-1">DeepSeek</span>
-    </div>
-    <div class="ml-auto flex items-center gap-2">
-      <button onclick="openSettings()" class="p-1.5 hover:bg-surf-2 rounded-lg transition-colors">
-        <span class="material-symbols-rounded text-gray-400 text-[20px]">settings</span>
-      </button>
-      <div class="w-7 h-7 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-xs font-bold">U</div>
-    </div>
-  </header>
+        // Initialize Lucide icons
+        lucide.createIcons();
 
-  <!-- Chat area -->
-  <div id="chatArea" class="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-4">
+        // --- Initialization ---
+        function init() {
+            renderHistory();
+            if (config.apiKey) {
+                elements.apiKeyInput.value = config.apiKey;
+            }
+            if (config.customModel) {
+                elements.customModelInput.value = config.customModel;
+            }
+            
+            updateArenaUI();
+            
+            // Textarea auto-resize
+            elements.chatInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
 
-    <!-- Welcome screen -->
-    <div id="welcomeScreen" class="flex flex-col items-center justify-center flex-1 text-center py-10 max-w-2xl mx-auto w-full">
-      <div class="ai-icon mb-5">
-        <span class="material-symbols-rounded text-white text-[28px]">school</span>
-      </div>
-      <h1 class="text-2xl font-bold text-gray-800 mb-1">Hello, User</h1>
-      <p class="text-gray-400 text-sm mb-8">How can I help you today?</p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full text-left">
-        <button class="sug-card" onclick="sendSuggestion('जल चक्र (Water Cycle) को सरल हिंदी में समझाएं।')">
-          <p class="font-semibold text-gray-700 mb-1">🌊 जल चक्र समझाएं</p>
-          <p class="text-gray-400 text-xs">Class 5 Science – Water Cycle in Hindi</p>
-        </button>
-        <button class="sug-card" onclick="sendSuggestion('2x + 5 = 15 इस समीकरण को हल करें और step-by-step समझाएं।')">
-          <p class="font-semibold text-gray-700 mb-1">🔢 Algebra हल करें</p>
-          <p class="text-gray-400 text-xs">Class 8 Maths – Linear Equation</p>
-        </button>
-        <button class="sug-card" onclick="sendSuggestion('न्यूटन के गति के तीन नियम हिंदी में समझाएं उदाहरण सहित।')">
-          <p class="font-semibold text-gray-700 mb-1">⚡ Newton के नियम</p>
-          <p class="text-gray-400 text-xs">Class 9 Physics – Laws of Motion</p>
-        </button>
-        <button class="sug-card" onclick="sendSuggestion('भारत के स्वतंत्रता संग्राम पर एक निबंध की रूपरेखा बनाएं।')">
-          <p class="font-semibold text-gray-700 mb-1">📝 निबंध रूपरेखा</p>
-          <p class="text-gray-400 text-xs">History – Freedom Struggle Essay</p>
-        </button>
-      </div>
-    </div>
+            // Enter to send (Shift+Enter for newline)
+            elements.chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
 
-    <!-- Messages container -->
-    <div id="msgContainer" class="flex flex-col gap-4 max-w-3xl mx-auto w-full hidden"></div>
+            elements.sendBtn.addEventListener('click', sendMessage);
 
-    <!-- Loader -->
-    <div id="loader" class="hidden max-w-3xl mx-auto w-full flex gap-3 items-start">
-      <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center flex-shrink-0">
-        <span class="material-symbols-rounded text-white text-[15px]">school</span>
-      </div>
-      <div class="ai-bubble flex items-center" style="padding:14px 18px;">
-        <div class="dots"><span></span><span></span><span></span></div>
-      </div>
-    </div>
+            // Mobile menu toggle
+            elements.mobileToggle.addEventListener('click', () => {
+                elements.sidebar.classList.toggle('-translate-x-full');
+            });
+        }
 
-    <div id="anchor"></div>
-  </div>
+        // --- Arena Mode Logic ---
+        function toggleArenaMode() {
+            config.arenaMode = !config.arenaMode;
+            saveConfig();
+            updateArenaUI();
+        }
 
-  <!-- Input -->
-  <div class="p-4 bg-surf-1 border-t border-surf-3">
-    <div class="max-w-3xl mx-auto">
-      <!-- API key warning -->
-      <div id="apiWarn" class="hidden mb-2 text-center text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg py-2 px-3">
-        ⚠️ OpenRouter API Key नहीं है! Settings में जाकर API Key डालें।
-        <button onclick="openSettings()" class="underline font-semibold ml-1">Settings खोलें</button>
-      </div>
-      <div id="inputBox">
-        <textarea id="promptInput" rows="1" placeholder="Study Ai से कुछ भी पूछें (Class 1–12)..."
-          oninput="autoResize(this)" onkeydown="onKey(event)"></textarea>
-        <button id="sendBtn" onclick="handleSend()">
-          <span class="material-symbols-rounded text-[18px]">send</span>
-        </button>
-      </div>
-      <p class="text-center text-[11px] text-gray-400 mt-2">Study Ai से गलतियां हो सकती हैं। इसे <strong>Suhel & Saurabh Sir</strong> ने बनाया है।</p>
-    </div>
-  </div>
-</main>
+        function updateArenaUI() {
+            if (config.arenaMode) {
+                elements.arenaContainer.classList.remove('hidden');
+                elements.arenaToggleBtn.classList.add('bg-purple-900/30', 'border', 'border-purple-500/30');
+            } else {
+                elements.arenaContainer.classList.add('hidden');
+                elements.arenaToggleBtn.classList.remove('bg-purple-900/30', 'border', 'border-purple-500/30');
+            }
+        }
 
-<!-- SETTINGS MODAL -->
-<div id="settingsModal">
-  <div id="settingsBox">
-    <div class="flex items-center justify-between mb-5">
-      <h2 class="font-bold text-gray-800 text-lg">Settings</h2>
-      <button onclick="closeSettings()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surf-2 transition-colors">
-        <span class="material-symbols-rounded text-gray-400">close</span>
-      </button>
-    </div>
-    <div class="space-y-4">
-      <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1.5">OpenRouter API Key</label>
-        <input id="apiKeyInput" type="password" placeholder="sk-or-v1-..." class="w-full border border-surf-4 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-brand-400 transition-colors" />
-        <p class="text-xs text-gray-400 mt-1">
-          <a href="https://openrouter.ai/keys" target="_blank" class="text-brand-500 underline">openrouter.ai/keys</a> से free API key लें।
-        </p>
-      </div>
-      <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1.5">AI Model</label>
-        <input id="modelInput" type="text" value="deepseek/deepseek-v4-flash:free" class="w-full border border-surf-4 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-brand-400 transition-colors font-mono" />
-        <p class="text-xs text-gray-400 mt-1">Default: <code>deepseek/deepseek-v4-flash:free</code> (Free model)</p>
-      </div>
-      <button onclick="saveSettings()" class="w-full bg-gradient-to-r from-brand-500 to-brand-400 text-white font-semibold py-2.5 rounded-xl hover:opacity-90 transition-opacity">
-        Save Settings
-      </button>
-      <button onclick="clearHistory()" class="w-full border border-red-200 text-red-500 font-medium py-2 rounded-xl hover:bg-red-50 transition-colors text-sm">
-        🗑️ Chat History Clear करें
-      </button>
-    </div>
-  </div>
-</div>
+        // --- Settings Logic ---
+        function openSettings() { elements.settingsModal.classList.remove('hidden'); }
+        function closeSettings() { elements.settingsModal.classList.add('hidden'); }
 
-<script>
-// ── State ──
-let sessions = JSON.parse(localStorage.getItem('sai_sessions') || '[]');
-let currentId = null;
-let busy = false;
+        function saveSettings() {
+            config.apiKey = elements.apiKeyInput.value.trim();
+            config.customModel = elements.customModelInput.value.trim();
+            saveConfig();
+            closeSettings();
+            alert('Settings saved!');
+        }
 
-const SYSTEM = `Aap "Study Ai" hain — ek expert Hindi-medium AI teacher jo Suhel aur Saurabh Sir ne banaya hai.
+        function saveConfig() {
+            localStorage.setItem('yourfriend_config', JSON.stringify(config));
+        }
 
-Rules:
-1. HAMESHA sirf Hindi mein jawab do — chahe student kisi bhi language mein likhe.
-2. Bilkul real teacher ki tarah baat karo — simple, clear, pyaar se.
-3. Har jawab mein: pehle concept samjhao, phir example, phir steps (agar zaroorat ho).
-4. Markdown use karo: **bold**, bullet points, numbered lists, code blocks.
-5. Agar koi pooche "tum kaun ho" — bolo: "Main Study Ai hoon, Suhel aur Saurabh Sir ka banaya hua AI teacher!"
-6. Sirf educational content do — Class 1 se 12 tak ke subjects: Maths, Science, Hindi, English, Social Studies, Computer, etc.
-7. Kabhi bhi English mein jawab mat do.`;
+        // --- Chat Logic ---
+        async function sendMessage() {
+            const content = elements.chatInput.value.trim();
+            if (!content) return;
+            if (!config.apiKey) {
+                alert("Please add your OpenRouter API Key in Settings first!");
+                openSettings();
+                return;
+            }
 
-// ── Init ──
-function init() {
-  renderHistory();
-  loadSettings();
-  checkApiKey();
-}
+            // Create new chat if none active
+            if (!activeChatId) {
+                activeChatId = Date.now().toString();
+                chats.unshift({
+                    id: activeChatId,
+                    title: content.substring(0, 30) + (content.length > 30 ? '...' : ''),
+                    messages: []
+                });
+            }
 
-// ── Settings ──
-function loadSettings() {
-  const k = localStorage.getItem('sai_key') || '';
-  const m = localStorage.getItem('sai_model') || 'deepseek/deepseek-v4-flash:free';
-  document.getElementById('apiKeyInput').value = k;
-  document.getElementById('modelInput').value = m;
-}
-function saveSettings() {
-  const k = document.getElementById('apiKeyInput').value.trim();
-  const m = document.getElementById('modelInput').value.trim() || 'deepseek/deepseek-v4-flash:free';
-  localStorage.setItem('sai_key', k);
-  localStorage.setItem('sai_model', m);
-  closeSettings();
-  checkApiKey();
-  showToast('✅ Settings save ho gayi!');
-}
-function checkApiKey() {
-  const k = localStorage.getItem('sai_key') || '';
-  document.getElementById('apiWarn').classList.toggle('hidden', k.length > 0);
-}
-function openSettings() {
-  loadSettings();
-  document.getElementById('settingsModal').classList.add('show');
-}
-function closeSettings() {
-  document.getElementById('settingsModal').classList.remove('show');
-}
+            const currentChat = chats.find(c => c.id === activeChatId);
+            
+            // Add user message
+            const userMsg = { role: 'user', content };
+            currentChat.messages.push(userMsg);
+            
+            elements.chatInput.value = '';
+            elements.chatInput.style.height = 'auto';
+            elements.welcomeView.classList.add('hidden');
+            
+            renderMessages();
+            renderHistory();
+            saveChats();
 
-// ── Sidebar ──
-function toggleSidebar(open) {
-  document.getElementById('sidebar').classList.toggle('open', open);
-  document.getElementById('overlay').classList.toggle('hidden', !open);
-}
+            // Prepare for AI response
+            const primaryModel = elements.primaryModel.value === 'custom' ? config.customModel : elements.primaryModel.value;
+            const secondaryModel = elements.secondaryModel.value;
 
-// ── Chat ──
-function newChat() {
-  currentId = null;
-  document.getElementById('welcomeScreen').classList.remove('hidden');
-  document.getElementById('msgContainer').classList.add('hidden');
-  document.getElementById('msgContainer').innerHTML = '';
-  document.getElementById('promptInput').value = '';
-  document.getElementById('promptInput').style.height = 'auto';
-  renderHistory();
-  if (window.innerWidth < 768) toggleSidebar(false);
-}
+            if (config.arenaMode) {
+                // Arena Mode: Request both models
+                const arenaId = 'arena-' + Date.now();
+                appendArenaPlaceholder(arenaId);
+                
+                Promise.all([
+                    requestAIResponse(primaryModel, currentChat.messages.slice(0, -1), content, arenaId, 'left'),
+                    requestAIResponse(secondaryModel, currentChat.messages.slice(0, -1), content, arenaId, 'right')
+                ]).then(([res1, res2]) => {
+                    currentChat.messages.push({ 
+                        role: 'assistant_arena', 
+                        primary: res1, 
+                        secondary: res2,
+                        models: [primaryModel, secondaryModel]
+                    });
+                    saveChats();
+                    renderMessages();
+                });
 
-function sendSuggestion(text) {
-  document.getElementById('promptInput').value = text;
-  handleSend();
-}
+            } else {
+                // Single Mode
+                const placeholderId = 'ai-typing-' + Date.now();
+                appendMessage('assistant', '', primaryModel, placeholderId);
+                
+                const response = await requestAIResponse(primaryModel, currentChat.messages.slice(0, -1), content, placeholderId);
+                currentChat.messages.push({ role: 'assistant', content: response, model: primaryModel });
+                saveChats();
+                renderMessages();
+            }
+        }
 
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 160) + 'px';
-}
+        async function requestAIResponse(model, history, currentPrompt, elementId, arenaSide = null) {
+            const targetEl = document.getElementById(elementId + (arenaSide ? `-${arenaSide}` : ''));
+            const container = targetEl?.querySelector('.markdown-content') || targetEl;
+            
+            try {
+                // Simulate "Thinking"
+                if(container) container.innerHTML = '<div class="flex gap-1 items-center text-zinc-500 text-sm"><span class="thinking-dot">●</span><span class="thinking-dot" style="animation-delay: 0.2s">●</span><span class="thinking-dot" style="animation-delay: 0.4s">●</span> Thinking...</div>';
 
-function onKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
-}
+                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${config.apiKey}`,
+                        "HTTP-Referer": window.location.href,
+                        "X-Title": "YourFriend AI",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "model": model,
+                        "messages": [...history, { role: "user", content: currentPrompt }]
+                    })
+                });
 
-function scrollDown() {
-  document.getElementById('anchor').scrollIntoView({ behavior: 'smooth' });
-}
+                const data = await response.json();
+                const text = data.choices[0].message.content;
 
-// ── Render ──
-function mkUserMsg(text) {
-  const d = document.createElement('div');
-  d.className = 'flex justify-end';
-  d.innerHTML = `<div class="user-bubble">${text.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}</div>`;
-  return d;
-}
-function mkAiMsg(text) {
-  const d = document.createElement('div');
-  d.className = 'flex gap-3 items-start';
-  d.innerHTML = `
-    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center flex-shrink-0 mt-0.5">
-      <span class="material-symbols-rounded text-white text-[15px]">school</span>
-    </div>
-    <div class="ai-bubble flex-1">${DOMPurify.sanitize(marked.parse(text))}</div>`;
-  return d;
-}
+                // Simple thinking parser if model includes <thought>
+                const cleanText = text.replace(/<thought>[\s\S]*?<\/thought>/g, '');
+                
+                return cleanText;
+            } catch (err) {
+                console.error(err);
+                return "Error: Could not connect to API. Please check your key and model name.";
+            }
+        }
 
-// ── Session ──
-function getSession() { return sessions.find(s => s.id === currentId); }
-function saveSession(uText, aiText) {
-  if (!currentId) {
-    currentId = Date.now().toString();
-    const title = uText.length > 35 ? uText.slice(0, 35) + '…' : uText;
-    sessions.unshift({ id: currentId, title, msgs: [] });
-  }
-  const s = getSession();
-  if (s) {
-    s.msgs.push({ role:'user', content: uText });
-    s.msgs.push({ role:'assistant', content: aiText });
-    localStorage.setItem('sai_sessions', JSON.stringify(sessions));
-    renderHistory();
-  }
-}
-function loadSession(id) {
-  const s = sessions.find(x => x.id === id);
-  if (!s) return;
-  currentId = id;
-  document.getElementById('welcomeScreen').classList.add('hidden');
-  const mc = document.getElementById('msgContainer');
-  mc.classList.remove('hidden');
-  mc.innerHTML = '';
-  s.msgs.forEach(m => mc.appendChild(m.role === 'user' ? mkUserMsg(m.content) : mkAiMsg(m.content)));
-  scrollDown();
-  if (window.innerWidth < 768) toggleSidebar(false);
-}
-function renderHistory() {
-  const el = document.getElementById('histList');
-  if (!sessions.length) { el.innerHTML = '<p class="text-xs text-gray-400 px-2 py-1 italic">No recent chats</p>'; return; }
-  el.innerHTML = '';
-  sessions.slice(0, 12).forEach(s => {
-    const b = document.createElement('button');
-    b.className = 'hist-item w-full' + (s.id === currentId ? ' active' : '');
-    b.innerHTML = `<span class="material-symbols-rounded text-[14px] text-gray-400 flex-shrink-0">chat</span><span class="truncate">${s.title}</span>`;
-    b.onclick = () => loadSession(s.id);
-    el.appendChild(b);
-  });
-}
-function clearHistory() {
-  if (!confirm('Saari chat history delete karein?')) return;
-  sessions = []; currentId = null;
-  localStorage.removeItem('sai_sessions');
-  newChat();
-  closeSettings();
-  showToast('🗑️ History clear ho gayi!');
-}
+        function setPrompt(text) {
+            elements.chatInput.value = text;
+            elements.chatInput.focus();
+            elements.chatInput.style.height = (elements.chatInput.scrollHeight) + 'px';
+        }
 
-// ── Toast ──
-function showToast(msg) {
-  const t = document.createElement('div');
-  t.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-sm px-4 py-2 rounded-xl shadow-lg z-50 transition-opacity';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
-}
+        // --- Rendering Logic ---
+        function renderMessages() {
+            const currentChat = chats.find(c => c.id === activeChatId);
+            if (!currentChat) {
+                elements.welcomeView.classList.remove('hidden');
+                elements.messagesList.innerHTML = '';
+                return;
+            }
 
-// ── AI Call ──
-async function callAI(userText) {
-  const key = localStorage.getItem('sai_key') || '';
-  const model = localStorage.getItem('sai_model') || 'deepseek/deepseek-v4-flash:free';
-  if (!key) throw new Error('API_KEY_MISSING');
+            elements.welcomeView.classList.add('hidden');
+            elements.messagesList.innerHTML = '';
+            
+            currentChat.messages.forEach((msg, idx) => {
+                if (msg.role === 'assistant_arena') {
+                    renderArenaMessage(msg);
+                } else {
+                    appendMessage(msg.role, msg.content, msg.model);
+                }
+            });
+            
+            elements.chatWindow.scrollTo({ top: elements.chatWindow.scrollHeight, behavior: 'smooth' });
+            Prism.highlightAll();
+        }
 
-  const s = getSession();
-  const history = s ? s.msgs.slice(-8) : [];
-  const messages = [
-    { role: 'system', content: SYSTEM },
-    ...history,
-    { role: 'user', content: userText }
-  ];
+        function appendMessage(role, content, model = '', id = null) {
+            const isUser = role === 'user';
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2`;
+            if (id) msgDiv.id = id;
 
-  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${key}`,
-      'HTTP-Referer': window.location.href,
-      'X-Title': 'Study Ai'
-    },
-    body: JSON.stringify({ model, messages, max_tokens: 2048 })
-  });
+            const innerHtml = `
+                <div class="max-w-[85%] flex gap-4 ${isUser ? 'flex-row-reverse' : 'flex-row'}">
+                    <div class="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ${isUser ? 'bg-zinc-700' : 'bg-blue-600'}">
+                        <i data-lucide="${isUser ? 'user' : 'bot'}" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div class="space-y-2">
+                        ${!isUser && model ? `<div class="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">${model.split('/').pop()}</div>` : ''}
+                        <div class="markdown-content ${isUser ? 'bg-zinc-800 p-4 rounded-2xl rounded-tr-none' : 'text-zinc-200'}">
+                            ${isUser ? content : marked.parse(content || '')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            msgDiv.innerHTML = innerHtml;
+            elements.messagesList.appendChild(msgDiv);
+            lucide.createIcons();
+        }
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err?.error?.message || `HTTP ${res.status}`);
-  }
-  const data = await res.json();
-  return data.choices?.[0]?.message?.content || 'माफ करना, कोई जवाब नहीं मिला।';
-}
+        function appendArenaPlaceholder(id) {
+            const msgDiv = document.createElement('div');
+            msgDiv.id = id;
+            msgDiv.className = "arena-grid w-full";
+            msgDiv.innerHTML = `
+                <div id="${id}-left" class="bg-zinc-900/50 border border-zinc-800 p-4 rounded-xl min-h-[100px] markdown-content"></div>
+                <div id="${id}-right" class="bg-zinc-900/50 border border-zinc-800 p-4 rounded-xl min-h-[100px] markdown-content"></div>
+            `;
+            elements.messagesList.appendChild(msgDiv);
+        }
 
-// ── Send ──
-async function handleSend() {
-  if (busy) return;
-  const inp = document.getElementById('promptInput');
-  const text = inp.value.trim();
-  if (!text) return;
+        function renderArenaMessage(msg) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = "arena-grid w-full gap-4";
+            msgDiv.innerHTML = `
+                <div class="bg-zinc-900/50 border border-zinc-800 p-4 rounded-xl">
+                    <div class="text-[10px] uppercase tracking-widest text-zinc-500 font-bold mb-2">${msg.models[0].split('/').pop()}</div>
+                    <div class="markdown-content text-sm text-zinc-300">${marked.parse(msg.primary)}</div>
+                </div>
+                <div class="bg-zinc-900/50 border border-zinc-800 p-4 rounded-xl">
+                    <div class="text-[10px] uppercase tracking-widest text-zinc-500 font-bold mb-2">${msg.models[1].split('/').pop()}</div>
+                    <div class="markdown-content text-sm text-zinc-300">${marked.parse(msg.secondary)}</div>
+                </div>
+            `;
+            elements.messagesList.appendChild(msgDiv);
+        }
 
-  const key = localStorage.getItem('sai_key') || '';
-  if (!key) { openSettings(); return; }
+        function renderHistory() {
+            elements.historyList.innerHTML = '';
+            chats.forEach(chat => {
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left p-3 rounded-lg flex items-center gap-3 sidebar-item transition-all truncate text-sm ${activeChatId === chat.id ? 'active' : ''}`;
+                btn.onclick = () => loadChat(chat.id);
+                btn.innerHTML = `
+                    <i data-lucide="message-square" class="w-4 h-4 flex-shrink-0 text-zinc-400"></i>
+                    <span class="truncate">${chat.title}</span>
+                `;
+                elements.historyList.appendChild(btn);
+            });
+            lucide.createIcons();
+        }
 
-  busy = true;
-  inp.value = ''; inp.style.height = 'auto';
-  document.getElementById('sendBtn').disabled = true;
+        function createNewChat() {
+            activeChatId = null;
+            elements.messagesList.innerHTML = '';
+            elements.welcomeView.classList.remove('hidden');
+            renderHistory();
+            if(window.innerWidth < 1024) elements.sidebar.classList.add('-translate-x-full');
+        }
 
-  document.getElementById('welcomeScreen').classList.add('hidden');
-  const mc = document.getElementById('msgContainer');
-  mc.classList.remove('hidden');
-  mc.appendChild(mkUserMsg(text));
-  document.getElementById('loader').classList.remove('hidden');
-  scrollDown();
+        function loadChat(id) {
+            activeChatId = id;
+            renderMessages();
+            renderHistory();
+            if(window.innerWidth < 1024) elements.sidebar.classList.add('-translate-x-full');
+        }
 
-  try {
-    const reply = await callAI(text);
-    document.getElementById('loader').classList.add('hidden');
-    mc.appendChild(mkAiMsg(reply));
-    saveSession(text, reply);
-  } catch(e) {
-    document.getElementById('loader').classList.add('hidden');
-    let errMsg = `माफ करना, एक error आई:\n\n**${e.message}**`;
-    if (e.message === 'API_KEY_MISSING') errMsg = '⚠️ **OpenRouter API Key नहीं मिली!**\n\nकृपया Settings में जाकर अपनी API Key डालें।';
-    mc.appendChild(mkAiMsg(errMsg));
-    saveSession(text, errMsg);
-  }
+        function saveChats() {
+            localStorage.setItem('yourfriend_chats', JSON.stringify(chats));
+        }
 
-  busy = false;
-  document.getElementById('sendBtn').disabled = false;
-  scrollDown();
-}
+        // --- Run App ---
+        init();
 
-init();
-</script>
+    </script>
 </body>
-</html>
+                  </html>
+  
